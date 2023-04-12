@@ -204,7 +204,7 @@ while True:
             pygame.quit()
             exit()
 
-    if np.sum(tahta) >= 2048:
+    if np.in1d(2048, tahta):
         score = "Kazandınız"
         flag = False
     elif kayip():
