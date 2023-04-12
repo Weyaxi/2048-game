@@ -196,7 +196,6 @@ while True:
 
     if str(tahta) != eski:
         random_yerde_olustur()
-        print(tahta)
         time.sleep(0.08)
 
     for event in pygame.event.get():
