@@ -52,38 +52,13 @@ def draw_board():
             screen.blit(score_text, score_rect)
 
 
-def temizle(yon, tahta_fonksiyon):
-    if yon == "sag":
-        for a in range(4):
-            for m in range(4):
-                for p in range(3):
-                    if tahta_fonksiyon[m][p] != 0 and tahta_fonksiyon[m][p + 1] == 0:
-                        tahta_fonksiyon[m][p + 1] = tahta_fonksiyon[m][p]
-                        tahta_fonksiyon[m][p] = 0
-
-    elif yon == "sol":
-        for a in range(4):
-            for m in range(4):
-                for p in range(3, 0, -1):
-                    if tahta_fonksiyon[m][p] != 0 and tahta_fonksiyon[m][p - 1] == 0:
-                        tahta_fonksiyon[m][p - 1] = tahta_fonksiyon[m][p]
-                        tahta_fonksiyon[m][p] = 0
-
-    elif yon == "yukari":
-        for a in range(4):
-            for m in range(3, 0, -1):
-                for p in range(4):
-                    if tahta_fonksiyon[m][p] != 0 and tahta_fonksiyon[m - 1][p] == 0:
-                        tahta_fonksiyon[m - 1][p] = tahta_fonksiyon[m][p]
-                        tahta_fonksiyon[m][p] = 0
-
-    elif yon == "asagi":
-        for a in range(4):
-            for m in range(3):
-                for p in range(4):
-                    if tahta_fonksiyon[m][p] != 0 and tahta_fonksiyon[m + 1][p] == 0:
-                        tahta_fonksiyon[m + 1][p] = tahta_fonksiyon[m][p]
-                        tahta_fonksiyon[m][p] = 0
+def temizle(tahta_fonksiyon):
+    for a in range(4):
+        for m in range(4):
+            for p in range(3, 0, -1):
+                if tahta_fonksiyon[m][p] != 0 and tahta_fonksiyon[m][p - 1] == 0:
+                    tahta_fonksiyon[m][p - 1] = tahta_fonksiyon[m][p]
+                    tahta_fonksiyon[m][p] = 0
     return tahta_fonksiyon
 
 
@@ -99,25 +74,10 @@ def random_yerde_olustur():
     tahta[random.choice(olabilir)] = iki_mi_dort
 
 
-def sag():
-    global tahta
-
-    tahta = temizle("sag", tahta)
-
-    for a in range(4):
-        for i in range(3, -1, -1):
-            if tahta[a][i] == tahta[a][i - 1]:
-                tahta[a][i] = tahta[a][i] * 2
-                tahta[a][i - 1] = 0
-
-    tahta = temizle("sag", tahta)
-
-
-
 def sol():
     global tahta
 
-    tahta = temizle("sol", tahta)
+    tahta = temizle(tahta)
 
     for a in range(4):
         for i in range(3):
@@ -125,59 +85,47 @@ def sol():
                 tahta[a][i] = tahta[a][i] * 2
                 tahta[a][i + 1] = 0
 
-    tahta = temizle("sol", tahta)
+    tahta = temizle(tahta)
+
+
+
+def sag():
+    global tahta
+    tahta = np.fliplr(tahta)
+    sol()
+    tahta = np.fliplr(tahta)
 
 
 
 def yukari():
     global tahta
-
-
-    tahta = temizle("yukari", tahta)
-
-    for p in range(4):
-        for i in range(2, -1, -1):
-            if tahta[i][p] == tahta[i + 1][p]:
-                tahta[i + 1][p] = tahta[i][p] * 2
-                tahta[i][p] = 0
-
-    tahta = temizle("yukari", tahta)
-
+    tahta = np.transpose(tahta)
+    sol()
+    tahta = np.transpose(tahta)
 
 
 def asagi():
     global tahta
-
-    tahta = temizle("asagi", tahta)
-
-    for p in range(4):
-        for i in range(3):
-            if tahta[i][p] == tahta[i + 1][p]:
-                tahta[i][p] = tahta[i][p] * 2
-                tahta[i + 1][p] = 0
-
-    tahta = temizle("asagi", tahta)
+    tahta = np.transpose(tahta)
+    tahta = np.fliplr(tahta)
+    sol()
+    tahta = np.fliplr(tahta)
+    tahta = np.transpose(tahta)
 
 
 def kayip():
     global tahta
     temp = tahta.copy()
-    yukari()
-    if str(temp) != str(tahta):
+
+    butunmove = [sol, sag, yukari, asagi]
+
+    for move in butunmove:
+        move()
+        if str(temp) != str(tahta):
+            tahta = temp.copy()
+            return False
         tahta = temp.copy()
-        return False
-    asagi()
-    if str(temp) != str(tahta):
-        tahta = temp.copy()
-        return False
-    sag()
-    if str(temp) != str(tahta):
-        tahta = temp.copy()
-        return False
-    sol()
-    if str(temp) != str(tahta):
-        tahta = temp.copy()
-        return False
+
     return True
 
 
@@ -204,7 +152,7 @@ while True:
             exit()
 
     if np.in1d(2048, tahta):
-        score = "Kazandınız"
+        score = "Kazandiniz"
         flag = False
     elif kayip():
         score = "Kaybettiniz"
